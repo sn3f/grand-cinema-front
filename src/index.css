@@ -2,3 +2,32 @@ body {
   font-family: sans-serif;
   margin: 2rem;
 }
+
+label {
+  display: block;
+  margin: 1rem 0;
+}
+
+.seats {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.seat {
+  width: 3rem;
+  height: 3rem;
+  background: #a5d6a7;
+  border: 1px solid #555;
+  cursor: pointer;
+}
+
+.seat:disabled {
+  background: #ccc;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.seat.selected {
+  background: #1976d2;
+  color: white;
+}
