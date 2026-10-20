@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
-const API_URL = 'http://localhost:8080/api/sessions'
+// En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
 
 // Appelle l'API et lance une erreur avec le message du back si la requête échoue
 async function callApi(url, method) {
