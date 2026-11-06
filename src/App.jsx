@@ -5,8 +5,13 @@ import Auth from './Auth.jsx'
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
 
 // Appelle l'API et lance une erreur avec le message du back si la requête échoue
-async function callApi(url, method) {
-  const response = await fetch(url, { method: method })
+async function callApi(url, method, authHeader) {
+  const options = { method: method }
+  if (authHeader) {
+    options.headers = { Authorization: authHeader }
+  }
+
+  const response = await fetch(url, options)
   const data = await response.json()
 
   if (!response.ok) {
@@ -22,6 +27,7 @@ function App() {
   const [availableIds, setAvailableIds] = useState([])
   const [selectedIds, setSelectedIds] = useState([])
   const [message, setMessage] = useState('')
+  const [authHeader, setAuthHeader] = useState('')
 
   // Charge tous les sièges de la salle et l'id des sièges libres
   async function loadSeats() {
@@ -71,6 +77,23 @@ function App() {
     }
   }
 
+  // Enregistre la réservation pour l'utilisateur connecté, puis recharge les sièges
+  async function confirmReservation() {
+    if (authHeader === '') {
+      setMessage('Connectez-vous pour réserver')
+      return
+    }
+    const url = API_URL + '/' + sessionId + '/reservations?seatIds=' + selectedIds.join(',')
+
+    try {
+      const reservation = await callApi(url, 'POST', authHeader)
+      await loadSeats()
+      setMessage('Réservation n°' + reservation.id + ' confirmée')
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
   function seatClass(seat) {
     if (selectedIds.includes(seat.id)) {
       return 'seat selected'
@@ -85,7 +108,7 @@ function App() {
   return (
     <main>
       <h1>Grand Cinéma</h1>
-      <Auth />
+      <Auth onLogin={setAuthHeader} />
 
       <label>
         Séance n°{' '}
@@ -117,6 +140,7 @@ function App() {
 
           <p>{selectedIds.length} siège(s) sélectionné(s) sur {seatCount}</p>
           <button onClick={submitSelection}>Valider la sélection</button>
+          <button onClick={confirmReservation}>Confirmer la réservation</button>
         </div>
       )}
 

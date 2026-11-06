@@ -4,7 +4,7 @@ import { useState } from 'react'
 const AUTH_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/auth'
 
 // Formulaires de connexion et d'inscription, puis affichage de l'utilisateur connecté
-function Auth() {
+function Auth(props) {
   const [user, setUser] = useState(null)
   const [message, setMessage] = useState('')
 
@@ -21,6 +21,7 @@ function Auth() {
     if (response.ok) {
       setUser(await response.json())
       setMessage('')
+      props.onLogin('Basic ' + credentials)
     } else {
       setMessage('Email ou mot de passe incorrect')
     }
@@ -55,6 +56,7 @@ function Auth() {
 
   function logout() {
     setUser(null)
+    props.onLogin('')
   }
 
   if (user) {
