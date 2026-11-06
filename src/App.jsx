@@ -146,6 +146,9 @@ function App() {
             <input type="number" min="1" value={seatCount} onChange={(event) => setSeatCount(event.target.value)} />
           </label>
 
+          <p>
+            {availableIds.length} places libres sur {seats.length}
+          </p>
           <p>Vert : libre, gris : occupé, bleu : sélectionné</p>
 
           <div className="seats">
