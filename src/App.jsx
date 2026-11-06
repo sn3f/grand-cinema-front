@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Auth from './Auth.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
@@ -84,6 +85,7 @@ function App() {
   return (
     <main>
       <h1>Grand Cinéma</h1>
+      <Auth />
 
       <label>
         Séance n°{' '}

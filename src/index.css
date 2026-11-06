@@ -8,6 +8,11 @@ label {
   margin: 1rem 0;
 }
 
+.auth {
+  display: flex;
+  gap: 4rem;
+}
+
 .seats {
   display: flex;
   gap: 0.5rem;
