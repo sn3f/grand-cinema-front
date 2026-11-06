@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Auth from './Auth.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
@@ -21,7 +21,8 @@ async function callApi(url, method, authHeader) {
 }
 
 function App() {
-  const [sessionId, setSessionId] = useState(1)
+  const [sessions, setSessions] = useState([])
+  const [sessionId, setSessionId] = useState(null)
   const [seatCount, setSeatCount] = useState(1)
   const [seats, setSeats] = useState([])
   const [availableIds, setAvailableIds] = useState([])
@@ -29,15 +30,29 @@ function App() {
   const [message, setMessage] = useState('')
   const [authHeader, setAuthHeader] = useState('')
 
-  // Charge tous les sièges de la salle et l'id des sièges libres
-  async function loadSeats() {
+  // Charge la programmation (séances à venir) à l'ouverture de la page
+  async function loadSessions() {
+    try {
+      setSessions(await callApi(API_URL, 'GET'))
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
+  useEffect(function () {
+    loadSessions()
+  }, [])
+
+  // Charge tous les sièges de la salle de la séance choisie et l'id des sièges libres
+  async function loadSeats(id) {
+    setSessionId(id)
     setSeats([])
     setSelectedIds([])
     setMessage('')
 
     try {
-      const allSeats = await callApi(API_URL + '/' + sessionId + '/seats', 'GET')
-      const availableSeats = await callApi(API_URL + '/' + sessionId + '/available-seats', 'GET')
+      const allSeats = await callApi(API_URL + '/' + id + '/seats', 'GET')
+      const availableSeats = await callApi(API_URL + '/' + id + '/available-seats', 'GET')
 
       const ids = []
       for (const seat of availableSeats) {
@@ -87,11 +102,15 @@ function App() {
 
     try {
       const reservation = await callApi(url, 'POST', authHeader)
-      await loadSeats()
+      await loadSeats(sessionId)
       setMessage('Réservation n°' + reservation.id + ' confirmée')
     } catch (error) {
       setMessage(error.message)
     }
+  }
+
+  function formatDate(sessionDt) {
+    return new Date(sessionDt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
   }
 
   function seatClass(seat) {
@@ -110,11 +129,15 @@ function App() {
       <h1>Grand Cinéma</h1>
       <Auth onLogin={setAuthHeader} />
 
-      <label>
-        Séance n°{' '}
-        <input type="number" min="1" value={sessionId} onChange={(event) => setSessionId(event.target.value)} />
-      </label>
-      <button onClick={loadSeats}>Afficher les sièges</button>
+      <h2>Programmation</h2>
+      <ul>
+        {sessions.map((session) => (
+          <li key={session.id}>
+            {session.movie.title} : {formatDate(session.sessionDt)}, {session.room.name}{' '}
+            <button onClick={() => loadSeats(session.id)}>Choisir</button>
+          </li>
+        ))}
+      </ul>
 
       {seats.length > 0 && (
         <div>
