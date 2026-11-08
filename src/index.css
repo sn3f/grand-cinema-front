@@ -36,3 +36,9 @@ label {
   background: #1976d2;
   color: white;
 }
+
+.ticket {
+  max-width: 24rem;
+  padding: 1rem;
+  border: 2px dashed #555;
+}

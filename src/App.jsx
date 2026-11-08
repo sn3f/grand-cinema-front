@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Auth from './Auth.jsx'
+import Ticket from './Ticket.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
@@ -29,6 +30,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useState([])
   const [message, setMessage] = useState('')
   const [authHeader, setAuthHeader] = useState('')
+  const [ticket, setTicket] = useState(null)
 
   // Charge la programmation (séances à venir) à l'ouverture de la page
   async function loadSessions() {
@@ -49,6 +51,7 @@ function App() {
     setSeats([])
     setSelectedIds([])
     setMessage('')
+    setTicket(null)
 
     try {
       const allSeats = await callApi(API_URL + '/' + id + '/seats', 'GET')
@@ -104,6 +107,9 @@ function App() {
       const reservation = await callApi(url, 'POST', authHeader)
       await loadSeats(sessionId)
       setMessage('Réservation n°' + reservation.id + ' confirmée')
+      if (reservation.status === 'CONFIRMED') {
+        setTicket(reservation)
+      }
     } catch (error) {
       setMessage(error.message)
     }
@@ -171,6 +177,7 @@ function App() {
       )}
 
       <p>{message}</p>
+      {ticket && <Ticket reservation={ticket} />}
     </main>
   )
 }
