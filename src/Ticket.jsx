@@ -1,6 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react'
 
-// Affiche le billet d'une réservation confirmée, avec un QR code contenant son numéro
+// Affiche le billet d'une réservation confirmée, avec un QR code contenant son code aléatoire
 function Ticket(props) {
   const reservation = props.reservation
   const session = reservation.session
@@ -20,8 +20,8 @@ function Ticket(props) {
       <p>Séance : {date}</p>
       <p>Salle : {session.room.name}</p>
       <p>Siège(s) : {numbers.join(', ')}</p>
-      <QRCodeSVG value={'GRAND-CINEMA-RESERVATION-' + reservation.id} />
-      <p>Le billet est aussi envoyé par e-mail à {reservation.user.email}</p>
+      <QRCodeSVG value={reservation.ticketCode} />
+      <p>Envoyé par e-mail à {reservation.user.email}</p>
     </div>
   )
 }

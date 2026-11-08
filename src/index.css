@@ -10,11 +10,13 @@ label {
 
 .auth {
   display: flex;
+  flex-wrap: wrap;
   gap: 4rem;
 }
 
 .seats {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -39,6 +41,23 @@ label {
 
 .ticket {
   max-width: 24rem;
+  margin: 1rem 0;
   padding: 1rem;
   border: 2px dashed #555;
+}
+
+/* Téléphone : marges réduites et billet sur toute la largeur */
+@media (max-width: 600px) {
+  body {
+    margin: 1rem;
+  }
+
+  .auth {
+    gap: 1rem;
+  }
+
+  .ticket {
+    max-width: none;
+    font-size: 1.1rem;
+  }
 }

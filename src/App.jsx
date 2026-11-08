@@ -4,7 +4,7 @@ import Ticket from './Ticket.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
-
+const MY_TICKETS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/reservations/mine'
 // Appelle l'API et lance une erreur avec le message du back si la requête échoue
 async function callApi(url, method, authHeader) {
   const options = { method: method }
@@ -30,7 +30,7 @@ function App() {
   const [selectedIds, setSelectedIds] = useState([])
   const [message, setMessage] = useState('')
   const [authHeader, setAuthHeader] = useState('')
-  const [ticket, setTicket] = useState(null)
+  const [myTickets, setMyTickets] = useState([])
 
   // Charge la programmation (séances à venir) à l'ouverture de la page
   async function loadSessions() {
@@ -51,7 +51,6 @@ function App() {
     setSeats([])
     setSelectedIds([])
     setMessage('')
-    setTicket(null)
 
     try {
       const allSeats = await callApi(API_URL + '/' + id + '/seats', 'GET')
@@ -106,13 +105,25 @@ function App() {
     try {
       const reservation = await callApi(url, 'POST', authHeader)
       await loadSeats(sessionId)
-      setMessage('Réservation n°' + reservation.id + ' confirmée')
-      if (reservation.status === 'CONFIRMED') {
-        setTicket(reservation)
-      }
+      setMessage('Réservation n°' + reservation.id + ' confirmée : votre billet est dans « Mes billets » et vous a été envoyé par e-mail')
     } catch (error) {
       setMessage(error.message)
     }
+  }
+
+  // Charge les billets (réservations confirmées) de l'utilisateur connecté
+  async function loadMyTickets() {
+    try {
+      setMyTickets(await callApi(MY_TICKETS_URL, 'GET', authHeader))
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
+  // À la connexion ou déconnexion, on oublie les billets de l'utilisateur précédent
+  function handleLogin(header) {
+    setAuthHeader(header)
+    setMyTickets([])
   }
 
   function formatDate(sessionDt) {
@@ -133,7 +144,17 @@ function App() {
   return (
     <main>
       <h1>Grand Cinéma</h1>
-      <Auth onLogin={setAuthHeader} />
+      <Auth onLogin={handleLogin} />
+
+      {authHeader !== '' && (
+        <section>
+          <h2>Mes billets</h2>
+          <button onClick={loadMyTickets}>Afficher mes billets</button>
+          {myTickets.map((myTicket) => (
+            <Ticket key={myTicket.id} reservation={myTicket} />
+          ))}
+        </section>
+      )}
 
       <h2>Programmation</h2>
       <ul>
@@ -177,7 +198,6 @@ function App() {
       )}
 
       <p>{message}</p>
-      {ticket && <Ticket reservation={ticket} />}
     </main>
   )
 }
