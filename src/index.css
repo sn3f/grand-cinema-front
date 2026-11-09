@@ -79,6 +79,11 @@ td {
   vertical-align: top;
 }
 
+/* Ligne la plus demandée d'un tableau de fréquentation */
+tr.best {
+  font-weight: bold;
+}
+
 .ticket {
   max-width: 24rem;
   margin: 1rem 0;

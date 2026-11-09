@@ -26,6 +26,7 @@ function Availability(props) {
   return (
     <section className="panel">
       <h2>Disponibilités d'une séance</h2>
+      <p>Avant la vente : places restantes d'une séance à venir.</p>
       <label>
         Séance{' '}
         <select onChange={loadAvailability} defaultValue="">
