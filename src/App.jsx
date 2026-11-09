@@ -4,6 +4,7 @@ import Ticket from './Ticket.jsx'
 import Movies from './Movies.jsx'
 import Sessions from './Sessions.jsx'
 import Reservations from './Reservations.jsx'
+import Availability from './Availability.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
@@ -154,6 +155,7 @@ function App() {
       {role === 'ADMIN' && <Movies authHeader={authHeader} onChange={loadSessions} />}
       {role === 'ADMIN' && <Sessions authHeader={authHeader} sessions={sessions} onChange={loadSessions} />}
       {role === 'ADMIN' && <Reservations authHeader={authHeader} sessions={sessions} />}
+      {role === 'ADMIN' && <Availability sessions={sessions} />}
 
       {authHeader !== '' && (
         <section>
