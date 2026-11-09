@@ -61,6 +61,24 @@ label {
   border-top: 1px solid #ccc;
 }
 
+/* Tableau des réservations : défile horizontalement sur téléphone */
+.table {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  background: white;
+}
+
+th,
+td {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  text-align: left;
+  vertical-align: top;
+}
+
 .ticket {
   max-width: 24rem;
   margin: 1rem 0;
