@@ -19,9 +19,10 @@ function Auth(props) {
     })
 
     if (response.ok) {
-      setUser(await response.json())
+      const connectedUser = await response.json()
+      setUser(connectedUser)
       setMessage('')
-      props.onLogin('Basic ' + credentials)
+      props.onLogin('Basic ' + credentials, connectedUser.role)
     } else {
       setMessage('Email ou mot de passe incorrect')
     }
@@ -56,7 +57,7 @@ function Auth(props) {
 
   function logout() {
     setUser(null)
-    props.onLogin('')
+    props.onLogin('', '')
   }
 
   if (user) {

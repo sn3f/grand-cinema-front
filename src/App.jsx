@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Auth from './Auth.jsx'
 import Ticket from './Ticket.jsx'
+import Movies from './Movies.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
@@ -31,6 +32,7 @@ function App() {
   const [message, setMessage] = useState('')
   const [authHeader, setAuthHeader] = useState('')
   const [myTickets, setMyTickets] = useState([])
+  const [role, setRole] = useState('')
 
   // Charge la programmation (séances à venir) à l'ouverture de la page
   async function loadSessions() {
@@ -121,8 +123,9 @@ function App() {
   }
 
   // À la connexion ou déconnexion, on oublie les billets de l'utilisateur précédent
-  function handleLogin(header) {
+  function handleLogin(header, userRole) {
     setAuthHeader(header)
+    setRole(userRole)
     setMyTickets([])
   }
 
@@ -145,6 +148,8 @@ function App() {
     <main>
       <h1>Grand Cinéma</h1>
       <Auth onLogin={handleLogin} />
+
+      {role === 'ADMIN' && <Movies authHeader={authHeader} onChange={loadSessions} />}
 
       {authHeader !== '' && (
         <section>
