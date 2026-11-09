@@ -39,6 +39,28 @@ label {
   color: white;
 }
 
+/* Encadré d'un bloc de l'administration (films, séances) */
+.panel {
+  margin: 2rem 0;
+  padding: 0 1.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f7f7f7;
+}
+
+.panel li {
+  margin: 0.5rem 0;
+}
+
+.panel li button {
+  margin-left: 0.5rem;
+}
+
+.panel form {
+  padding-top: 0.5rem;
+  border-top: 1px solid #ccc;
+}
+
 .ticket {
   max-width: 24rem;
   margin: 1rem 0;

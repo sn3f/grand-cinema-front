@@ -73,7 +73,7 @@ function Movies(props) {
   }
 
   return (
-    <section>
+    <section className="panel">
       <h2>Gestion des films</h2>
       <ul>
         {movies.map((movie) => (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Auth from './Auth.jsx'
 import Ticket from './Ticket.jsx'
 import Movies from './Movies.jsx'
+import Sessions from './Sessions.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
@@ -150,6 +151,7 @@ function App() {
       <Auth onLogin={handleLogin} />
 
       {role === 'ADMIN' && <Movies authHeader={authHeader} onChange={loadSessions} />}
+      {role === 'ADMIN' && <Sessions authHeader={authHeader} sessions={sessions} onChange={loadSessions} />}
 
       {authHeader !== '' && (
         <section>
