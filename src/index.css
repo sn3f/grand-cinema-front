@@ -79,6 +79,20 @@ td {
   vertical-align: top;
 }
 
+/* Filtre par période : champs et boutons sur une ligne (passent à la ligne sur téléphone) */
+.panel .period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-top: 1rem;
+  border-top: none;
+}
+
+.period label {
+  margin: 0;
+}
+
 /* Cartes du tableau de bord : un gros chiffre et son libellé */
 .kpis {
   display: flex;

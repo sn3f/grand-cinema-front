@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const STATS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/stats'
-
 // Groupe (salle, horaire) qui a le plus de places réservées, ou null si la liste est vide
 function bestGroup(groups) {
   let best = null
@@ -48,19 +47,41 @@ function GroupTable(props) {
   )
 }
 
-// Analyse de la fréquentation pour l'administrateur : par séance, par salle et par horaire
+// Analyse de la fréquentation pour l'administrateur, sur toutes les séances ou sur une période (du ... au ...)
 function Stats(props) {
   const [stats, setStats] = useState(null)
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
 
-  async function loadStats() {
-    const response = await fetch(STATS_URL, { headers: { Authorization: props.authHeader } })
+  async function loadStats(fromDate, toDate) {
+    let url = STATS_URL + '?from=' + fromDate + '&to=' + toDate
+    if (fromDate === '' && toDate === '') {
+      url = STATS_URL
+    } else if (fromDate === '') {
+      url = STATS_URL + '?to=' + toDate
+    } else if (toDate === '') {
+      url = STATS_URL + '?from=' + fromDate
+    }
+    const response = await fetch(url, { headers: { Authorization: props.authHeader } })
     setStats(await response.json())
   }
 
   // Recharge les statistiques à l'ouverture et quand la programmation change
   useEffect(function () {
-    loadStats()
+    loadStats(from, to)
   }, [props.sessions])
+
+  function filter(event) {
+    event.preventDefault()
+    loadStats(from, to)
+  }
+
+  // Efface la période : toutes les séances
+  function showAll() {
+    setFrom('')
+    setTo('')
+    loadStats('', '')
+  }
 
   function formatDate(sessionDt) {
     return new Date(sessionDt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
@@ -75,6 +96,19 @@ function Stats(props) {
 
   return (
     <section className="panel">
+      <form className="period" onSubmit={filter}>
+        <label>
+          Du <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+        </label>
+        <label>
+          Au <input type="date" value={to} onChange={(event) => setTo(event.target.value)} />
+        </label>
+        <button>Filtrer</button>
+        <button type="button" onClick={showAll}>
+          Tout
+        </button>
+      </form>
+
       <h2>Tableau de bord</h2>
       <div className="kpis">
         <div className="kpi">

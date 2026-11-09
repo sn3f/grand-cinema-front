@@ -170,48 +170,50 @@ function App() {
         </section>
       )}
 
-      <h2>Programmation</h2>
-      <ul>
-        {sessions.map((session) => (
-          <li key={session.id}>
-            {session.movie.title} : {formatDate(session.sessionDt)}, {session.room.name}{' '}
-            {role !== 'ADMIN' && <button onClick={() => loadSeats(session.id)}>Choisir</button>}
-          </li>
-        ))}
-      </ul>
+      <section className="panel">
+        <h2>Programmation</h2>
+        <ul>
+          {sessions.map((session) => (
+            <li key={session.id}>
+              {session.movie.title} : {formatDate(session.sessionDt)}, {session.room.name}{' '}
+              {role !== 'ADMIN' && <button onClick={() => loadSeats(session.id)}>Choisir</button>}
+            </li>
+          ))}
+        </ul>
 
-      {seats.length > 0 && (
-        <div>
-          <label>
-            Nombre de places{' '}
-            <input type="number" min="1" value={seatCount} onChange={(event) => setSeatCount(event.target.value)} />
-          </label>
+        {seats.length > 0 && (
+          <div>
+            <label>
+              Nombre de places{' '}
+              <input type="number" min="1" value={seatCount} onChange={(event) => setSeatCount(event.target.value)} />
+            </label>
 
-          <p>
-            {availableIds.length} places libres sur {seats.length}
-          </p>
-          <p>Vert : libre, gris : occupé, bleu : sélectionné</p>
+            <p>
+              {availableIds.length} places libres sur {seats.length}
+            </p>
+            <p>Vert : libre, gris : occupé, bleu : sélectionné</p>
 
-          <div className="seats">
-            {seats.map((seat) => (
-              <button
-                key={seat.id}
-                className={seatClass(seat)}
-                disabled={isOccupied(seat)}
-                onClick={() => toggleSeat(seat.id)}
-              >
-                {seat.seatNum}
-              </button>
-            ))}
+            <div className="seats">
+              {seats.map((seat) => (
+                <button
+                  key={seat.id}
+                  className={seatClass(seat)}
+                  disabled={isOccupied(seat)}
+                  onClick={() => toggleSeat(seat.id)}
+                >
+                  {seat.seatNum}
+                </button>
+              ))}
+            </div>
+
+            <p>{selectedIds.length} siège(s) sélectionné(s) sur {seatCount}</p>
+            <button onClick={submitSelection}>Valider la sélection</button>
+            <button onClick={confirmReservation}>Confirmer la réservation</button>
           </div>
+        )}
 
-          <p>{selectedIds.length} siège(s) sélectionné(s) sur {seatCount}</p>
-          <button onClick={submitSelection}>Valider la sélection</button>
-          <button onClick={confirmReservation}>Confirmer la réservation</button>
-        </div>
-      )}
-
-      <p>{message}</p>
+        <p>{message}</p>
+      </section>
     </main>
   )
 }
