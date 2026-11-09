@@ -79,6 +79,27 @@ td {
   vertical-align: top;
 }
 
+/* Cartes du tableau de bord : un gros chiffre et son libellé */
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.kpi {
+  width: 10rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+}
+
+.kpi strong {
+  display: block;
+  font-size: 1.8rem;
+  color: #1976d2;
+}
+
 /* Ligne la plus demandée d'un tableau de fréquentation */
 tr.best {
   font-weight: bold;

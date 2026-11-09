@@ -3,23 +3,24 @@ import { useEffect, useState } from 'react'
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const STATS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/stats'
 
-// Libellé du groupe qui a le plus de places réservées (affiché en gras)
-function mostBooked(groups) {
+// Groupe (salle, horaire) qui a le plus de places réservées, ou null si la liste est vide
+function bestGroup(groups) {
   let best = null
   for (const group of groups) {
     if (best === null || group.bookedSeats > best.bookedSeats) {
       best = group
     }
   }
-  if (best === null) {
-    return ''
-  }
-  return best.label
+  return best
 }
 
 // Tableau d'un cumul (par salle, par horaire) : réservées, proposées et taux de remplissage
 function GroupTable(props) {
-  const best = mostBooked(props.groups)
+  const bestRow = bestGroup(props.groups)
+  let best = ''
+  if (bestRow) {
+    best = bestRow.label
+  }
 
   return (
     <div className="table">
@@ -69,8 +70,43 @@ function Stats(props) {
     return null
   }
 
+  const bestRoom = bestGroup(stats.rooms)
+  const bestHour = bestGroup(stats.hours)
+
   return (
     <section className="panel">
+      <h2>Tableau de bord</h2>
+      <div className="kpis">
+        <div className="kpi">
+          <strong>{stats.total.fillRate} %</strong>
+          Taux de remplissage global ({stats.total.bookedSeats} places sur {stats.total.totalSeats})
+        </div>
+        <div className="kpi">
+          <strong>{stats.total.bookedSeats}</strong>
+          Places vendues
+        </div>
+        <div className="kpi">
+          <strong>{stats.confirmedReservations}</strong>
+          Réservations confirmées
+        </div>
+        <div className="kpi">
+          <strong>{stats.cancelledReservations}</strong>
+          Réservations annulées
+        </div>
+        {bestRoom && (
+          <div className="kpi">
+            <strong>{bestRoom.label}</strong>
+            Salle la plus fréquentée
+          </div>
+        )}
+        {bestHour && (
+          <div className="kpi">
+            <strong>{bestHour.label}</strong>
+            Horaire le plus demandé
+          </div>
+        )}
+      </div>
+
       <h2>Fréquentation</h2>
 
       <h3>Par séance</h3>
