@@ -1,11 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Auth from './Auth.jsx'
+import Ticket from './Ticket.jsx'
+import Movies from './Movies.jsx'
+import Sessions from './Sessions.jsx'
+import Reservations from './Reservations.jsx'
+import Availability from './Availability.jsx'
+import Stats from './Stats.jsx'
 
 // En local, l'API est sur localhost:8080 ; sur Render, son adresse est donnée par VITE_API_URL
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/sessions'
-
+const MY_TICKETS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080') + '/api/reservations/mine'
 // Appelle l'API et lance une erreur avec le message du back si la requête échoue
-async function callApi(url, method) {
-  const response = await fetch(url, { method: method })
+async function callApi(url, method, authHeader) {
+  const options = { method: method }
+  if (authHeader) {
+    options.headers = { Authorization: authHeader }
+  }
+
+  const response = await fetch(url, options)
   const data = await response.json()
 
   if (!response.ok) {
@@ -15,22 +27,40 @@ async function callApi(url, method) {
 }
 
 function App() {
-  const [sessionId, setSessionId] = useState(1)
+  const [sessions, setSessions] = useState([])
+  const [sessionId, setSessionId] = useState(null)
   const [seatCount, setSeatCount] = useState(1)
   const [seats, setSeats] = useState([])
   const [availableIds, setAvailableIds] = useState([])
   const [selectedIds, setSelectedIds] = useState([])
   const [message, setMessage] = useState('')
+  const [authHeader, setAuthHeader] = useState('')
+  const [myTickets, setMyTickets] = useState([])
+  const [role, setRole] = useState('')
 
-  // Charge tous les sièges de la salle et l'id des sièges libres
-  async function loadSeats() {
+  // Charge la programmation (séances à venir) à l'ouverture de la page
+  async function loadSessions() {
+    try {
+      setSessions(await callApi(API_URL, 'GET'))
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
+  useEffect(function () {
+    loadSessions()
+  }, [])
+
+  // Charge tous les sièges de la salle de la séance choisie et l'id des sièges libres
+  async function loadSeats(id) {
+    setSessionId(id)
     setSeats([])
     setSelectedIds([])
     setMessage('')
 
     try {
-      const allSeats = await callApi(API_URL + '/' + sessionId + '/seats', 'GET')
-      const availableSeats = await callApi(API_URL + '/' + sessionId + '/available-seats', 'GET')
+      const allSeats = await callApi(API_URL + '/' + id + '/seats', 'GET')
+      const availableSeats = await callApi(API_URL + '/' + id + '/available-seats', 'GET')
 
       const ids = []
       for (const seat of availableSeats) {
@@ -70,6 +100,44 @@ function App() {
     }
   }
 
+  // Enregistre la réservation pour l'utilisateur connecté, puis recharge les sièges
+  async function confirmReservation() {
+    if (authHeader === '') {
+      setMessage('Connectez-vous pour réserver')
+      return
+    }
+    const url = API_URL + '/' + sessionId + '/reservations?seatIds=' + selectedIds.join(',')
+
+    try {
+      const reservation = await callApi(url, 'POST', authHeader)
+      await loadSeats(sessionId)
+      setMessage('Réservation n°' + reservation.id + ' confirmée : votre billet est dans « Mes billets » et vous a été envoyé par e-mail')
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
+  // Charge les billets (réservations confirmées) de l'utilisateur connecté
+  async function loadMyTickets() {
+    try {
+      setMyTickets(await callApi(MY_TICKETS_URL, 'GET', authHeader))
+    } catch (error) {
+      setMessage(error.message)
+    }
+  }
+
+  // À la connexion ou déconnexion, on oublie les billets de l'utilisateur précédent
+  function handleLogin(header, userRole) {
+    setAuthHeader(header)
+    setRole(userRole)
+    setMyTickets([])
+    setSeats([])
+  }
+
+  function formatDate(sessionDt) {
+    return new Date(sessionDt).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })
+  }
+
   function seatClass(seat) {
     if (selectedIds.includes(seat.id)) {
       return 'seat selected'
@@ -84,41 +152,68 @@ function App() {
   return (
     <main>
       <h1>Grand Cinéma</h1>
+      <Auth onLogin={handleLogin} />
 
-      <label>
-        Séance n°{' '}
-        <input type="number" min="1" value={sessionId} onChange={(event) => setSessionId(event.target.value)} />
-      </label>
-      <button onClick={loadSeats}>Afficher les sièges</button>
+      {role === 'ADMIN' && <Movies authHeader={authHeader} onChange={loadSessions} />}
+      {role === 'ADMIN' && <Sessions authHeader={authHeader} sessions={sessions} onChange={loadSessions} />}
+      {role === 'ADMIN' && <Reservations authHeader={authHeader} sessions={sessions} />}
+      {role === 'ADMIN' && <Availability sessions={sessions} />}
+      {role === 'ADMIN' && <Stats authHeader={authHeader} sessions={sessions} />}
 
-      {seats.length > 0 && (
-        <div>
-          <label>
-            Nombre de places{' '}
-            <input type="number" min="1" value={seatCount} onChange={(event) => setSeatCount(event.target.value)} />
-          </label>
-
-          <p>Vert : libre, gris : occupé, bleu : sélectionné</p>
-
-          <div className="seats">
-            {seats.map((seat) => (
-              <button
-                key={seat.id}
-                className={seatClass(seat)}
-                disabled={isOccupied(seat)}
-                onClick={() => toggleSeat(seat.id)}
-              >
-                {seat.seatNum}
-              </button>
-            ))}
-          </div>
-
-          <p>{selectedIds.length} siège(s) sélectionné(s) sur {seatCount}</p>
-          <button onClick={submitSelection}>Valider la sélection</button>
-        </div>
+      {authHeader !== '' && role !== 'ADMIN' && (
+        <section>
+          <h2>Mes billets</h2>
+          <button onClick={loadMyTickets}>Afficher mes billets</button>
+          {myTickets.map((myTicket) => (
+            <Ticket key={myTicket.id} reservation={myTicket} />
+          ))}
+        </section>
       )}
 
-      <p>{message}</p>
+      <section className="panel">
+        <h2>Programmation</h2>
+        <ul>
+          {sessions.map((session) => (
+            <li key={session.id}>
+              {session.movie.title} : {formatDate(session.sessionDt)}, {session.room.name}{' '}
+              {role !== 'ADMIN' && <button onClick={() => loadSeats(session.id)}>Choisir</button>}
+            </li>
+          ))}
+        </ul>
+
+        {seats.length > 0 && (
+          <div>
+            <label>
+              Nombre de places{' '}
+              <input type="number" min="1" value={seatCount} onChange={(event) => setSeatCount(event.target.value)} />
+            </label>
+
+            <p>
+              {availableIds.length} places libres sur {seats.length}
+            </p>
+            <p>Vert : libre, gris : occupé, bleu : sélectionné</p>
+
+            <div className="seats">
+              {seats.map((seat) => (
+                <button
+                  key={seat.id}
+                  className={seatClass(seat)}
+                  disabled={isOccupied(seat)}
+                  onClick={() => toggleSeat(seat.id)}
+                >
+                  {seat.seatNum}
+                </button>
+              ))}
+            </div>
+
+            <p>{selectedIds.length} siège(s) sélectionné(s) sur {seatCount}</p>
+            <button onClick={submitSelection}>Valider la sélection</button>
+            <button onClick={confirmReservation}>Confirmer la réservation</button>
+          </div>
+        )}
+
+        <p>{message}</p>
+      </section>
     </main>
   )
 }

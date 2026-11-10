@@ -8,8 +8,15 @@ label {
   margin: 1rem 0;
 }
 
+.auth {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+}
+
 .seats {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
@@ -30,4 +37,107 @@ label {
 .seat.selected {
   background: #1976d2;
   color: white;
+}
+
+/* Encadré d'un bloc de l'administration (films, séances) */
+.panel {
+  margin: 2rem 0;
+  padding: 0 1.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f7f7f7;
+}
+
+.panel li {
+  margin: 0.5rem 0;
+}
+
+.panel li button {
+  margin-left: 0.5rem;
+}
+
+.panel form {
+  padding-top: 0.5rem;
+  border-top: 1px solid #ccc;
+}
+
+/* Tableau des réservations : défile horizontalement sur téléphone */
+.table {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  background: white;
+}
+
+th,
+td {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ccc;
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Filtre par période : champs et boutons sur une ligne (passent à la ligne sur téléphone) */
+.panel .period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-top: 1rem;
+  border-top: none;
+}
+
+.period label {
+  margin: 0;
+}
+
+/* Cartes du tableau de bord : un gros chiffre et son libellé */
+.kpis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.kpi {
+  width: 10rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+}
+
+.kpi strong {
+  display: block;
+  font-size: 1.8rem;
+  color: #1976d2;
+}
+
+/* Ligne la plus demandée d'un tableau de fréquentation */
+tr.best {
+  font-weight: bold;
+}
+
+.ticket {
+  max-width: 24rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 2px dashed #555;
+}
+
+/* Téléphone : marges réduites et billet sur toute la largeur */
+@media (max-width: 600px) {
+  body {
+    margin: 1rem;
+  }
+
+  .auth {
+    gap: 1rem;
+  }
+
+  .ticket {
+    max-width: none;
+    font-size: 1.1rem;
+  }
 }
